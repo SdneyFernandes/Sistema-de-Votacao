@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.security.Key;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
@@ -23,12 +24,14 @@ Possui métodos para extrair o nome de usuário do token e validar a integridade
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "CHAVE_SECRETA";
-    private static final long EXPIRATION_TIME = 86400000; // 1 dia
+	 @Value("${jwt.secret}")
+	    private String secretKey; 
+	 
+	 	private static final long EXPIRATION_TIME = 86400000; // 1 dia
 
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
-    }
+	    private Key getSigningKey() {
+	        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+	    }
 
     public String generateToken(String username) {
         return Jwts.builder()

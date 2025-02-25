@@ -5,6 +5,7 @@ import br.com.voting_system_user_service.enums.Role;
 import jakarta.persistence. *;
 import lombok. *;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -37,6 +38,11 @@ public class User {
 	private Role role = Role.USER;
 	
 	@Column(nullable = false, updatable = false)
-	private LocalDateTime createdAt = LocalDateTime.now();
+	private LocalDateTime createdAt;
+	
+	@PrePersist
+	protected void onCreate() {
+		this.createdAt = LocalDateTime.now();
+	}
 	
 }
