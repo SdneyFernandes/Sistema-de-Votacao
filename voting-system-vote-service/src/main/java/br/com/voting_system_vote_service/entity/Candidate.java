@@ -18,7 +18,7 @@ public class Candidate {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long ig;
+	private Long id;
 	
 	@Column(nullable = false)
 	private String name;

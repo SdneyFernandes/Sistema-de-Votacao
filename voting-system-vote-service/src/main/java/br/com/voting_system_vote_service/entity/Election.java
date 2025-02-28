@@ -14,7 +14,7 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "table_vote")
+@Table(name = "table_election")
 @Getter
 @Setter
 @NoArgsConstructor

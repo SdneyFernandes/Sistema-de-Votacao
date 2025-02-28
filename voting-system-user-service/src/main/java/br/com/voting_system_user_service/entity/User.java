@@ -5,7 +5,7 @@ import br.com.voting_system_user_service.enums.Role;
 import jakarta.persistence. *;
 import lombok. *;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 
 /**

@@ -34,5 +34,5 @@ public class Vote {
 	private Election election;
 	
 	@Column(nullable = false) 
-	private LocalDateTime timesstamp;
+	private LocalDateTime timesStamp;
 }

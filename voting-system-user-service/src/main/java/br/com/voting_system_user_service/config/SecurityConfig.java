@@ -27,11 +27,12 @@ public class SecurityConfig {
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register", "/api/users/login", "/h2-console/**").permitAll() // Permições de acesso
-                        .anyRequest().authenticated()
-                		 )
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/users/register", "/api/users/login", "/h2-console/**","/api/users", "/api/users/**").permitAll() 
+                /*.requestMatchers("/api/users", "/api/users/**").authenticated() */
+                .anyRequest().authenticated()
+        		 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers
                     .frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin()) // Permite o uso de frames do mesmo domínio
