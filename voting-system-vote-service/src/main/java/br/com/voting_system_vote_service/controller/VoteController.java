@@ -24,31 +24,15 @@ public class VoteController {
 	@Autowired
 	private VoteService voteService;
 	
-	@PostMapping("/{electionId}/vote")
-	public ResponseEntity<String> registerVote(
-			@RequestParam Long userId,
-			@PathVariable Long electionId,
-			@RequestParam Long candidateId) {
-		
-		String response = voteService.registerVote(userId, electionId, candidateId);
-		return ResponseEntity.ok(response);
-	}
+	@PostMapping("/{voteSessionId}/cast")
+    public ResponseEntity<String> castVote(
+            @PathVariable Long voteSessionId,
+            @RequestParam Long userId,
+            @RequestParam String option) {
+        String responseMessage = voteService.castVote(voteSessionId, userId, option);
+        return ResponseEntity.ok(responseMessage);
+    }
 	
-	@GetMapping("/{electionId}/count")
-	public ResponseEntity<Long> countVotes(
-			@PathVariable Long electionId,
-			@RequestParam Long candidateId) {
-			
-		long count = voteService.countVotes(electionId, candidateId);
-		return ResponseEntity.ok(count);
-		
-	}
-	
-	@GetMapping("/{electionId}")
-	public ResponseEntity<List<Vote>> getVotesByElection(@PathVariable Long electionId) {
-		List<Vote> votes = voteService.getVotesByElection(electionId);
-		return ResponseEntity.ok(votes);
-	}
 }
 
 

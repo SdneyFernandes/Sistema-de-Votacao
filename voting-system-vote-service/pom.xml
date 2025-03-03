@@ -86,6 +86,9 @@
             <configuration>
                 <source>21</source>  <!-- Substitua pelo Java correto -->
                 <target>21</target>
+                <compilerArgs>
+                    <arg>-parameters</arg>
+                </compilerArgs>
             </configuration>
         </plugin>
 

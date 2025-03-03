@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Vote {
 	
 	@Id
@@ -26,13 +25,17 @@ public class Vote {
 	private Long userId;
 	
 	@ManyToOne
-	@JoinColumn(name = "candidate_id", nullable = false)
-	private Candidate candidate;
+	@JoinColumn(name = "voteSession_id", nullable = false)
+	private VoteSession voteSession;
 	
-	@ManyToOne
-	@JoinColumn(name = "election_id", nullable = false)
-	private Election election;
+	@Column(nullable = false)
+	private String chosenOption;
 	
 	@Column(nullable = false) 
-	private LocalDateTime timesStamp;
+	private LocalDateTime createdAt;
+	
+	@PrePersist
+	public void prePersist() {
+		this.createdAt = LocalDateTime.now();
+	}
 }
