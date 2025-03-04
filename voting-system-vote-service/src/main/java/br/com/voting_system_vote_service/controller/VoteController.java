@@ -27,8 +27,8 @@ public class VoteController {
 	@PostMapping("/{voteSessionId}/cast")
     public ResponseEntity<String> castVote(
             @PathVariable Long voteSessionId,
-            @RequestParam Long userId,
-            @RequestParam String option) {
+            @RequestParam(required = true) Long userId,
+            @RequestParam(required = true) String option) {
         String responseMessage = voteService.castVote(voteSessionId, userId, option);
         return ResponseEntity.ok(responseMessage);
     }

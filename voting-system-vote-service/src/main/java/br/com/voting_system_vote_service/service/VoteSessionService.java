@@ -42,15 +42,20 @@ public class VoteSessionService {
 	    }
 
 	    public VoteSession getVoteSession(Long voteSessionId) {
-	        return voteSessionRepository.findById(voteSessionId)
+	    	VoteSession session = voteSessionRepository.findById(voteSessionId)
 	                .orElseThrow(() -> new RuntimeException("Sessão de votação não encontrada"));
+	    	session.updateStatus();
+	    	return session;
 	    }
 
 	    public void deleteVoteSession(Long voteSessionId) {
-	        if (!voteSessionRepository.existsById(voteSessionId)) {
-	            throw new RuntimeException("Sessão de votação não encontrada");
+	    	VoteSession session = voteSessionRepository.findById(voteSessionId)
+	    			.orElseThrow(() -> new RuntimeException("Sessão de votação não encontrada"));
+	    			
+	        if (!voteRepository.findByVoteSession(session).isEmpty()) {
+	            throw new RuntimeException("Não é possivel excluir uma votação que ja possui votos registrados");
 	        }
-	        voteSessionRepository.deleteById(voteSessionId);
+	        voteSessionRepository.delete(session);
 	    }
 	    
 	    public Map<String, Long> getVoteResults(Long voteSessionId) {

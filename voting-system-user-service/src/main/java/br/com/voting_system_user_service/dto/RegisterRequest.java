@@ -1,5 +1,6 @@
 package br.com.voting_system_user_service.dto;
 
+import br.com.voting_system_user_service.enums.Role;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -19,5 +20,7 @@ public class RegisterRequest {
 	
 	@NotBlank
 	private String password;
+	
+	private Role role = Role.USER;
 
 }

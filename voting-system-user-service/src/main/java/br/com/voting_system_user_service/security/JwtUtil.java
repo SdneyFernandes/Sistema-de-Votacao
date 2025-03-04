@@ -8,6 +8,8 @@ import java.security.Key;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import br.com.voting_system_user_service.enums.Role;
+
 /**
  * @author fsdney
 
@@ -33,23 +35,33 @@ public class JwtUtil {
 	        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 	    }
 
-    public String generateToken(String username) {
-        return Jwts.builder()
-                .setSubject(username) 
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256) 
-                .compact();
-    }
+	    public String generateToken(Long userId, Role role) {
+	        return Jwts.builder()
+	                .setSubject(userId.toString())
+	                .claim("role", role.name()) 
+	                .setIssuedAt(new Date())
+	                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+	                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+	                .compact();
+	    }
+	    
+	    public String getUserIdFromToken(String token) {
+	        return Jwts.parserBuilder()
+	                .setSigningKey(getSigningKey())
+	                .build()
+	                .parseClaimsJws(token)
+	                .getBody()
+	                .getSubject(); 
+	    }
 
-    public String getUsernameFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey()) 
-                .build()
-                .parseClaimsJws(token)
-                .getBody() 
-                .getSubject();
-    }
+	    public String getUserRoleFromToken(String token) {
+	        return Jwts.parserBuilder()
+	                .setSigningKey(getSigningKey())
+	                .build()
+	                .parseClaimsJws(token)
+	                .getBody()
+	                .get("role", String.class);
+	    }
 
     public boolean validateToken(String token) {
         try {

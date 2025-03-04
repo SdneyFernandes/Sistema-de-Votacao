@@ -2,11 +2,15 @@ package br.com.voting_system_user_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import br.com.voting_system_user_service.security.*;
 
 /**
  * @author fsdney
@@ -22,21 +26,48 @@ Configura a política de gerenciamento de sessão para ser sem estado (stateless
 
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 	
-	@Bean
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/register", "/api/users/login", "/h2-console/**","/api/users", "/api/users/**").permitAll() 
-                /*.requestMatchers("/api/users", "/api/users/**").authenticated() */
-                .anyRequest().authenticated()
-        		 )
+                .csrf(csrf -> csrf.disable()) // Desativa CSRF para permitir requisições POST em APIs REST
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/users/register", "/api/users/login").permitAll() // Público (registro e login)
+                        .requestMatchers("/h2-console/**").permitAll() // Permitir acesso ao console do H2
+                        
+                        // Somente ADMIN pode gerenciar usuários
+                        .requestMatchers("/api/users").hasRole("ADMIN") // Listar usuários
+                        .requestMatchers("/api/users/{id}").hasRole("ADMIN") // Deletar usuários
+                        
+                        // Somente ADMIN pode criar e deletar votações
+                        .requestMatchers("/api/votes_session/create").hasRole("ADMIN") 
+                        .requestMatchers("/api/votes_session/{id}").hasRole("ADMIN") 
+                        .requestMatchers("/api/votes_session/{id}/delete").hasRole("ADMIN") 
+
+                        // Usuários comuns podem apenas listar, buscar e ver resultados de votações
+                        .requestMatchers("/api/votes_session").authenticated()
+                        .requestMatchers("/api/votes_session/{id}").authenticated()
+                        .requestMatchers("/api/votes_session/{id}/results").authenticated()
+
+                        // Votação: qualquer usuário autenticado pode votar
+                        .requestMatchers("/api/votes/{voteSessionId}/cast").authenticated()
+
+                        // Qualquer outra requisição precisa estar autenticada
+                        .anyRequest().authenticated()
+                )
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Permite uso do H2 Console
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers(headers -> headers
-                    .frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin()) // Permite o uso de frames do mesmo domínio
-                );
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 	

@@ -5,10 +5,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import br.com.voting_system_user_service.repository.UserRepository;
 
+
 import br.com.voting_system_user_service.dto.*;
 import br.com.voting_system_user_service.entity.User;
 import br.com.voting_system_user_service.enums.Role;
-import br.com.voting_system_user_service.security.JwtUtil;
+import br.com.voting_system_user_service.security. JwtUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -41,22 +42,24 @@ public class AuthService {
             throw new RuntimeException("E-mail já cadastrado.");
         }
 
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .build();
-
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(request.getRole() != null ? request.getRole() : Role.USER); 
         userRepository.save(user);
+
         return "Usuário cadastrado com sucesso!";
     }
 
     public String loginUser(LoginRequest request) {
-        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
-        if (userOpt.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
-            throw new RuntimeException("Credenciais inválidas.");
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Credenciais inválidas"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Credenciais inválidas");
         }
-        return jwtUtil.generateToken(userOpt.get().getUsername());
+
+        return jwtUtil.generateToken(user.getId(), user.getRole());
     }
 }

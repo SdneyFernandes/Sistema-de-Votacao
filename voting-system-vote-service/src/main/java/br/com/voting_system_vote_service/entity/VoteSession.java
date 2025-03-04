@@ -42,11 +42,14 @@ public class VoteSession {
 	@Enumerated(EnumType.STRING)
 	private VoteStatus status;
 	
-	@PrePersist
-	public void prePersist() {
-		if (LocalDateTime.now().isBefore(startAt)) {
+	
+	//define o status baseado na data do servidor no momento da  eleição e atualiza dinamicamente
+	//evita que votações antigas apareçam ainda como ativas
+	public void updateStatus() {
+		LocalDateTime now = LocalDateTime.now();
+		if (now.isBefore(startAt)) {
 			status = VoteStatus.NOT_STARTED;
-		} else if (LocalDateTime.now().isAfter(endAt)) {
+		} else if (now.isAfter(endAt)) {
 			status = VoteStatus.ENDED;
 		} else {
 			status = VoteStatus.ACTIVE;
