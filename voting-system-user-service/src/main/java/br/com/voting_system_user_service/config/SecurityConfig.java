@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 import br.com.voting_system_user_service.security.*;
 
@@ -28,7 +29,6 @@ Configura a política de gerenciamento de sessão para ser sem estado (stateless
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll() // Público (registro e login)
                         .requestMatchers("/h2-console/**").permitAll() // Permitir acesso ao console do H2
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permite requisições OPTIONS
                         
                         // Somente ADMIN pode gerenciar usuários
                         .requestMatchers("/api/users").hasRole("ADMIN") // Listar usuários
@@ -60,6 +61,9 @@ public class SecurityConfig {
 
                         // Votação: qualquer usuário autenticado pode votar
                         .requestMatchers("/api/votes/{voteSessionId}/cast").authenticated()
+                        
+                        .requestMatchers("/api/users/me").authenticated()
+
 
                         // Qualquer outra requisição precisa estar autenticada
                         .anyRequest().authenticated()
@@ -70,13 +74,12 @@ public class SecurityConfig {
 
         return http.build();
     }
-	
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
-
 
 /*Integração das Classes
 Fluxo de Registro:

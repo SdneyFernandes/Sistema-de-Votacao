@@ -4,6 +4,8 @@ import br.com.voting_system_user_service.dto.UserDTO;
 import br.com.voting_system_user_service.entity.User;
 import br.com.voting_system_user_service.service.UserService;
 
+import br.com.voting_system_user_service.security.JwtUtil;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:3000") 
 public class UserController {
 	
 private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -25,6 +28,9 @@ private static final Logger logger = LoggerFactory.getLogger(UserController.clas
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private JwtUtil jwtUtil;
 	
 	@GetMapping
 	public ResponseEntity<List<UserDTO>> getAllUsers() {
@@ -50,6 +56,18 @@ private static final Logger logger = LoggerFactory.getLogger(UserController.clas
 		userService.deleteUser(id);
 		return ResponseEntity.noContent().build();
 	}
+	
+	@GetMapping("/me") 
+	public ResponseEntity<UserDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
+	    String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+	    UserDTO userDTO = userService.getUserById(Long.parseLong(userId)); 
+	    return ResponseEntity.ok(userDTO); 
+	}
+
+
+
+
+
 	
 	 
 

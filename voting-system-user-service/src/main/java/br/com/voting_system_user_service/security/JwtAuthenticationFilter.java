@@ -34,6 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+        // Permitir requisições OPTIONS sem autenticação
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            chain.doFilter(request, response);
+            return;
+        }
+
         String token = extractToken(request);
         if (token != null && jwtUtil.validateToken(token)) {
             String userId = jwtUtil.getUserIdFromToken(token);

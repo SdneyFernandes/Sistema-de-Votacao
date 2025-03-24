@@ -114,6 +114,10 @@ private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 		userRepository.delete(user);
 	}
 	
+	public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com e-mail: " + email));
+    }
 	
 
 }
