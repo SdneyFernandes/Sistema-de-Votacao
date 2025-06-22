@@ -3,16 +3,18 @@ package br.com.voting_system_vote_service.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-import br.com.voting_system_vote_service.dto.UserResponse;
+
+import br.com.voting_system_user_service.dto. *;
 
 /**
  * @author fsdney
  */
 
-@FeignClient(name = "user-service", url = "http://localhost:8081/api/users")
+@FeignClient(name = "voting-system-user-service", path = "/api/users")
 public interface UserServiceClient {
-    
+
     @GetMapping("/{id}")
-    UserResponse getUserById(@PathVariable("id") Long id);
+    UserDTO getUserById(@PathVariable("id") Long id);
 }
+
 

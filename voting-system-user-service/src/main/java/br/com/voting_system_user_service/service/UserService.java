@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -24,100 +26,114 @@ public class UserService {
 	
 private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 	
-	@Autowired
-    private MeterRegistry meterRegistry;
+    private final MeterRegistry meterRegistry;
+	private final UserRepository userRepository;
 	
-	@Autowired
-	private UserRepository userRepository;
-	
-	
+	 public UserService(UserRepository userRepository, MeterRegistry meterRegistry) {
+	        this.userRepository = userRepository;
+	        this.meterRegistry = meterRegistry;  
+ }
 	
 	public List<UserDTO> getAllUsers() {
-		 long startTime = System.currentTimeMillis();
-	        meterRegistry.counter("listar.usuarios.chamadas").increment();
-
-	        logger.info("Listando usuarios");
-		
-	        long duration = System.currentTimeMillis() - startTime;
-	        meterRegistry.timer("listar.usuarios.chamadas.tempo").record(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
-
-		return userRepository.findAll().stream()
-		       .map(UserDTO::new)
-		       .collect(Collectors.toList());
-	}
-	
-	public UserDTO getUserById(Long id) {
-		long startTime = System.currentTimeMillis();
-        meterRegistry.counter("buscar.usuario.porId.chamadas").increment();
-
-        logger.info("Buscando usuario com id {}", id);
+		logger.info("Recebida requisição para listar todos os usuários.");
+        meterRegistry.counter("usuario.listar.todas.chamadas").increment();
         
-		User user = userRepository.findById(id)
-		   .orElseThrow(() -> {
-			   logger.warn("Usuario com id {} não encontrado", id);
-			   return new RuntimeException("Usuario não encontrado");
-		   });
-		 
-		long duration = System.currentTimeMillis() - startTime;
-        meterRegistry.timer("buscar.usuario.porId.chamadas.tempo").record(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
-
-        logger.info("Usuario encontrado com sucesso");
-		  
-	 return new UserDTO(user);
+        long start = System.currentTimeMillis();
+        List<User> users = userRepository.findAll();
+        long end = System.currentTimeMillis();
+        meterRegistry.timer("usuario.listar.todas.tempo").record(end - start, TimeUnit.MILLISECONDS);
+        
+        if (users.isEmpty()) {
+        	logger.warn("Lista de usuários retornou vazia.");
+            meterRegistry.counter("usuario.listar.todas.vazio").increment();
+        } else {
+        	 logger.info(" {} usuários encontrados", users.size());
+	         meterRegistry.counter("usuario.listar.todas.sucesso").increment();
+	         meterRegistry.gauge("usuario.listar.todas.quantidade", users, List::size);
+        } 
+        
+        return users.stream().map(UserDTO::new).collect(Collectors.toList());
 	}
 	
-	public UserDTO updateUser(Long id, User updateUser) {
-		
-		long startTime = System.currentTimeMillis();
-        meterRegistry.counter("atualizar.dados.usuario.chamadas").increment();
+	public Optional<UserDTO> getUserById(Long id) {
+		logger.info("Recebida requisição para buscar usuário com ID {}", id);
+        meterRegistry.counter("usuario.buscar.id.chamadas").increment();
 
-        logger.info("Alterando dados do usuario com id {}", id);
-		
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> {
-				logger.warn("Usuario com id {} não encontrado", id);
-				return new RuntimeException("Usuario não encontrado");
-	});
-		
-		
-		user.setUsername(updateUser.getUsername());
-		user.setEmail(updateUser.getEmail());
-		userRepository.save(user);
-		
-		long duration = System.currentTimeMillis() - startTime;
-        meterRegistry.timer("atualizar.dados.usuario.chamadas.tempo").record(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
-
-        logger.info("Dados do Usuario actualizados com sucesso");
-		  
-		
-		return new UserDTO(user);
+        long start = System.currentTimeMillis();     
+		Optional<User> user = userRepository.findById(id);
+		long end = System.currentTimeMillis();
+        meterRegistry.timer("usuario.buscar.id.tempo").record(end - start, TimeUnit.MILLISECONDS);
+        
+        if (user.isPresent()) {
+        	logger.info("Usuário encontrado ",  user.get());
+            meterRegistry.counter("usuario.buscar.id.sucesso").increment();
+        } else {
+        	logger.warn("Usuário com ID {} não encontrado.", id);
+            meterRegistry.counter("usuario.buscar.id.naoencontrado").increment();
+        }
+        
+        return user.map(UserDTO::new);
 	}
 	
-	public void deleteUser(Long id) {
-		
-		long startTime = System.currentTimeMillis();
-        meterRegistry.counter("deletar.usuario.chamadas").increment();
+	 public Optional<UserDTO> getUserByName(String userName) {
+	        logger.info("Recebida requisição para buscar usuário com Nome {}", userName);
+	        meterRegistry.counter("usuario.buscar.nome.chamadas").increment();
 
-        logger.info("Deletando usuario com id {}", id);
-		
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> {
-					logger.warn("Usuario com id {} não encontrado", id);
-				return new RuntimeException("Usuario não encontrado");
-				});
-		
-		long duration = System.currentTimeMillis() - startTime;
-        meterRegistry.timer("deletar.usuario.chamadas.tempo").record(duration, java.util.concurrent.TimeUnit.MILLISECONDS);
+	        long start = System.currentTimeMillis();
+	        Optional<User> user = userRepository.findByUserName(userName);
+	        long end = System.currentTimeMillis();
+	        meterRegistry.timer("usuario.buscar.nome.tempo").record(end - start, TimeUnit.MILLISECONDS);
 
-        logger.info("Usuario deletado com sucesso");
-		
-		userRepository.delete(user);
+	        if (user.isPresent()) {
+	            logger.info("Usuário encontrado {}", user.get());
+	            meterRegistry.counter("usuario.buscar.nome.sucesso").increment();
+	        } else {
+	            logger.warn("Usuário com nome {} não encontrado.", userName);
+	            meterRegistry.counter("usuario.buscar.nome.naoencontrado").increment();
+	        }
+
+	        return user.map(UserDTO::new);
+	    }
+	
+	 public boolean deleteUserById(Long id) {
+	        logger.info("Recebida requisição para deletar usuário com ID {}", id);
+	        meterRegistry.counter("usuario.deletar.id.chamadas").increment();
+
+	        long start = System.currentTimeMillis();
+	        Optional<User> userExist = userRepository.findById(id);
+	        
+	        if (userExist.isPresent()) {
+	            userRepository.deleteById(id);
+	            logger.info("Usuário deletado com sucesso.");
+	            meterRegistry.counter("usuario.deletar.id.sucesso").increment();
+	            meterRegistry.timer("usuario.deletar.id.tempo").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+	            return true;
+	        } else {
+	            logger.warn("Usuário com ID {} não encontrado para exclusão.", id);
+	            meterRegistry.counter("usuario.deletar.id.naoencontrado").increment();
+	            meterRegistry.timer("usuario.deletar.id.tempo").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+	            return false;
+	        }
+	    }
+	    
+	 public boolean deleteUserByName(String userName) {
+	        logger.info("Recebida requisição para deletar usuário com nome {}", userName);
+	        meterRegistry.counter("usuario.deletar.nome.chamadas").increment();
+
+	        long start = System.currentTimeMillis();
+	        Optional<User> userExist = userRepository.findByUserName(userName);
+
+	        if (userExist.isPresent()) {
+	            userRepository.delete(userExist.get());
+	            logger.info("Usuário deletado com sucesso.", userName);
+	            meterRegistry.counter("usuario.deletar.nome.sucesso").increment();
+	            meterRegistry.timer("usuario.deletar.nome.tempo").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+	            return true;
+	        } else {
+	            logger.warn("Usuário com nome {} não encontrado para exclusão.", userName);
+	            meterRegistry.counter("usuario.deletar.nome.naoencontrado").increment();
+	            meterRegistry.timer("usuario.deletar.nome.tempo").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+	            return false;
+	        }
+	    }
 	}
-	
-	public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com e-mail: " + email));
-    }
-	
-
-}

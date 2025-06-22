@@ -1,4 +1,4 @@
-package br.com.voting_system_user_service.config;
+  package br.com.voting_system_user_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,32 +41,32 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Desativa CSRF para permitir requisições POST em APIs REST
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register", "/api/users/login").permitAll() // Público (registro e login)
-                        .requestMatchers("/h2-console/**").permitAll() // Permitir acesso ao console do H2
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permite requisições OPTIONS
-                        
-                        // Somente ADMIN pode gerenciar usuários
-                        .requestMatchers("/api/users").hasRole("ADMIN") // Listar usuários
-                        .requestMatchers("/api/users/{id}").hasRole("ADMIN") // Deletar usuários
-                        
-                        // Somente ADMIN pode criar e deletar votações
-                        .requestMatchers("/api/votes_session/create").hasRole("ADMIN") 
-                        .requestMatchers("/api/votes_session/{id}").hasRole("ADMIN") 
-                        .requestMatchers("/api/votes_session/{id}/delete").hasRole("ADMIN") 
+                		.requestMatchers(
+                			    "/api/users/register", 
+                			    "/api/users/login",
+                			    "/swagger-ui/**",             
+                			    "/v3/api-docs/**",            
+                			    "/swagger-resources/**",      
+                			    "/webjars/**",               
+                			    "/h2-console/**"
+                			).permitAll()
+                	    
+                	    // Regras para rotas protegidas abaixo
+                	    .requestMatchers("/api/users").hasRole("ADMIN")
+                	    .requestMatchers("/api/users/{id}").hasRole("ADMIN")
+                	    .requestMatchers("/api/users/{userName}").hasRole("ADMIN")
+                	    .requestMatchers("/api/votes_session/create").hasRole("ADMIN")
+                	    .requestMatchers("/api/votes_session/{id}").hasRole("ADMIN")
+                	    .requestMatchers("/api/votes_session/{id}/delete").hasRole("ADMIN")
+                	    .requestMatchers("/api/votes_session").authenticated()
+                	    .requestMatchers("/api/votes_session/{id}").authenticated()
+                	    .requestMatchers("/api/votes_session/{id}/results").authenticated()
+                	    .requestMatchers("/api/votes/{voteSessionId}/cast").authenticated()
+                	    .requestMatchers("/api/users/me").authenticated()
 
-                        // Usuários comuns podem apenas listar, buscar e ver resultados de votações
-                        .requestMatchers("/api/votes_session").authenticated()
-                        .requestMatchers("/api/votes_session/{id}").authenticated()
-                        .requestMatchers("/api/votes_session/{id}/results").authenticated()
+                	    .anyRequest().authenticated()
+                	
 
-                        // Votação: qualquer usuário autenticado pode votar
-                        .requestMatchers("/api/votes/{voteSessionId}/cast").authenticated()
-                        
-                        .requestMatchers("/api/users/me").authenticated()
-
-
-                        // Qualquer outra requisição precisa estar autenticada
-                        .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Permite uso do H2 Console
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

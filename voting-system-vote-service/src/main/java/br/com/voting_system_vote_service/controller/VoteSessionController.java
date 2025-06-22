@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import br.com.voting_system_vote_service.service.VoteSessionService;
 import br.com.voting_system_vote_service.entity.VoteSession;
+import br.com.voting_system_vote_service.dto. *;
 
 import java.util. *;
 
@@ -29,22 +30,23 @@ public class VoteSessionController {
 	private VoteSessionService voteSessionService;
 	
 	@PostMapping("/create")
-	public ResponseEntity<VoteSession> createVoteSession(@RequestBody VoteSession voteSession) {
-		logger.info("Recebida requisição para criar nova Sessão de Votação");
-		return ResponseEntity.ok(voteSessionService.createVoteSession(voteSession));
+	public ResponseEntity<VoteSessionDTO> createVoteSession(@RequestBody VoteSessionDTO voteSessionDTO) {
+	    logger.info("Recebida requisição para criar nova Sessão de Votação");
+	    VoteSessionDTO result = voteSessionService.createVoteSession(voteSessionDTO);
+	    return ResponseEntity.ok(result);
 	}
 	
 	@GetMapping("/")
-    public ResponseEntity<List<VoteSession>> getAllVoteSessions() {
+    public ResponseEntity<List<VoteSessionDTO>> getAllVoteSessions() {
 		logger.info("Recebida requisição para listar todas as Sessões de Votação");
-        List<VoteSession> sessions = voteSessionService.getAllVoteSessions();
+        List<VoteSessionDTO> sessions = voteSessionService.getAllVoteSessions();
         return ResponseEntity.ok(sessions);
     }
 
     @GetMapping("/{voteSessionId}")
-    public ResponseEntity<VoteSession> getVoteSession(@PathVariable Long voteSessionId) {
+    public ResponseEntity<VoteSessionDTO> getVoteSession(@PathVariable Long voteSessionId) {
     	logger.info("Recebida requisição para buscar Sessão de Votação");
-        VoteSession session = voteSessionService.getVoteSession(voteSessionId);
+        VoteSessionDTO session = voteSessionService.getVoteSession(voteSessionId);
         return ResponseEntity.ok(session);
     }
 

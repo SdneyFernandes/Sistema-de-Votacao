@@ -10,22 +10,17 @@ import lombok. *;
 
 /**
  * @author fsdney
+ * 
+ * DTO de saída para retornar informações do usuário
+ * 
  */
 
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class UserResponseDTO {
 	
-    private String userName;
+    private String username;
     private String email;
-    private Role role;  
-    
-    public UserDTO(User user) {
-        this.userName = user.getUserName();
-        this.email = user.getEmail();
-        this.role = user.getRole();
-    }
-
 }

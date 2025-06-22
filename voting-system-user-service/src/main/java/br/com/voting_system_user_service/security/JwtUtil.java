@@ -45,6 +45,8 @@ public class JwtUtil {
 	                .compact();
 	    }
 	    
+	    ++
+/    3,01
 	    public String getUserIdFromToken(String token) {
 	        return Jwts.parserBuilder()
 	                .setSigningKey(getSigningKey())
@@ -85,7 +87,8 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
+ *\
+ ,01}
 
     
     

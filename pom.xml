@@ -21,6 +21,7 @@
         <module>voting-system-vote-service</module>
         <module>voting-system-notification-service</module>
         <module>voting-system-frontend</module>
+        <module>voting-system-common-dto</module>
     </modules>
 
     

@@ -3,46 +3,51 @@ package br.com.voting_system_user_service.entity;
 
 import br.com.voting_system_user_service.enums.Role;
 import jakarta.persistence. *;
+import jakarta.validation.constraints. *;
 import lombok. *;
 
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * @author fsdney
  */
 @Entity
-@Table(name = "table_user")
-@Builder
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "table_user")
 public class User {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_user")
+	@SequenceGenerator(name = "sequence_user", sequenceName = "user_seq", allocationSize = 1)
+	@Column(name = "id", nullable = false)
     private Long id;
 	
-	@Column(nullable = false, unique = true)
-	private String username;
+	@NotBlank(message = "Nome é obrigatório")
+	@Column(name = "username", nullable = false)
+	private String userName;
 	
-	@Column(nullable = false, unique = true)
+	@Email(message = "E-mail inválido")
+    @NotBlank(message = "E-mail é obrigatório")
+	@Column(name = "email", nullable = false, unique = true)
 	private String email;
 	
-	@Column(nullable = false)
+    @NotBlank(message = "Password é obrigatório")
+	@Column(name = "password", nullable = false)
 	private  String password;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Role role = Role.USER;
 	
-	@Column(nullable = false, updatable = false)
-	private LocalDateTime createdAt;
+	@Column(name = "createdAt", nullable = false)
+	private LocalDate createdAt;
 	
 	@PrePersist
-	protected void onCreate() {
-		this.createdAt = LocalDateTime.now();
-	}
+    protected void prePersist() {
+        this.createdAt = LocalDate.now();
+    };
 	
 }

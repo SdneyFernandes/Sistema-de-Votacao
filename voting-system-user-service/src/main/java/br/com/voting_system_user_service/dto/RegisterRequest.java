@@ -4,6 +4,8 @@ import br.com.voting_system_user_service.enums.Role;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+
+
 /**
  * @author fsdney
  */
@@ -12,15 +14,18 @@ import lombok.Data;
 
 @Data
 public class RegisterRequest {
-	@NotBlank
-	private String username;
 	
-	@NotBlank
+	@NotBlank(message = "Nome é obrigatório")
+	private String userName;
+	
+	@NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email inválido")
 	private String email;
 	
-	@NotBlank
+	@NotBlank(message = "Senha é obrigatória")
 	private String password;
 	
-	private Role role = Role.USER;
+	@NotNull(message = "Role é obrigatorio")
+	private Role role;
 
 }

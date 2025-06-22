@@ -1,76 +1,89 @@
 package br.com.voting_system_user_service.controller;
 
 import br.com.voting_system_user_service.dto.UserDTO;
-import br.com.voting_system_user_service.entity.User;
 import br.com.voting_system_user_service.service.UserService;
-
 import br.com.voting_system_user_service.security.JwtUtil;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 /**
  * @author fsdney
  */
 
+
+
+@Tag(name = "Usuários", description = "Endpoints para gerenciamento de usuários")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:3000") 
 public class UserController {
-	
-private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-	
-	
-	@Autowired
-	private UserService userService;
-	
-	@Autowired
-	private JwtUtil jwtUtil;
-	
-	@GetMapping
-	public ResponseEntity<List<UserDTO>> getAllUsers() {
-		logger.info("Recebida requisição para criar listar todos usuarios");
-		return ResponseEntity.ok(userService.getAllUsers());
-	}
-	
-	@GetMapping("/{id}")
-	public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-		logger.info("Recebida requisição para buscar Usuario por Id");
-		return ResponseEntity.ok(userService.getUserById(id));
-	}
-	
-	@PutMapping("/{id}")
-	public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody User updateUser) {
-		logger.info("Recebida requisição para actualizar dados de usuario");
-		return ResponseEntity.ok(userService.updateUser(id, updateUser));
-	}
-	
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-		logger.info("Recebida requisição para deletar usuario");
-		userService.deleteUser(id);
-		return ResponseEntity.noContent().build();
-	}
-	
-	@GetMapping("/me") 
-	public ResponseEntity<UserDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
-	    String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
-	    UserDTO userDTO = userService.getUserById(Long.parseLong(userId)); 
-	    return ResponseEntity.ok(userDTO); 
-	}
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
+    public UserController(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
 
+    @Operation(summary = "Listar", description = "Método para listar todos os usuários")
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
 
-	
-	 
+    @Operation(summary = "Buscar Por Id", description = "Método para buscar um usuário por ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable("id") Long id) {
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
 
-	
+    @Operation(summary = "Buscar Por Nome", description = "Método para buscar um usuário por Nome")
+    @GetMapping("/userName/{userName}")
+    public ResponseEntity<UserDTO> getUserByName(@PathVariable("userName") String userName) {
+        return userService.getUserByName(userName)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
 
+    @Operation(summary = "Deletar Por Id", description = "Método para deletar um usuário por ID")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUserById(@PathVariable("id") Long id) {
+        boolean removed = userService.deleteUserById(id);
+        if (removed) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Usuário não encontrado para exclusão.");
+        }
+    }
+
+    @Operation(summary = "Deletar Por Nome", description = "Método para deletar um usuário por Nome")
+    @DeleteMapping("/userName/{userName}")
+    public ResponseEntity<String> deleteUserByName(@PathVariable("userName") String userName) {
+        boolean removed = userService.deleteUserByName(userName);
+        if (removed) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Usuário não encontrado para exclusão.");
+        }
+    }
 }

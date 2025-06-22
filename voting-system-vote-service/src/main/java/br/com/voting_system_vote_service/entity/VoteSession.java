@@ -1,6 +1,7 @@
 package br.com.voting_system_vote_service.entity;
 
 import br.com.voting_system_vote_service.enums.VoteStatus;
+import br.com.voting_system_user_service.entity.*;
 
 import jakarta.persistence. *;
 import lombok. *;
@@ -30,7 +31,7 @@ public class VoteSession {
 	@ElementCollection
 	private List<String> options;
 	
-	@Column(nullable = false)
+	@Column(name = "creator_id", nullable = false)
 	private Long creatorId;
 	
 	@Column(nullable = false)
