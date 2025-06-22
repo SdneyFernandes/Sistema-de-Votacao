@@ -34,9 +34,7 @@ Um sistema completo onde os usuários podem:
 - Cada microsserviço **gerencia seu próprio banco de dados** (PostgreSQL).  
 - Comunicação **síncrona (HTTP/REST)** e **assíncrona (Kafka/RabbitMQ)**.  
 - **Service Discovery (Eureka)** para registro dinâmico de serviços.  
-- **API Gateway** como ponto único de entrada.  
-
-![Arquitetura](https://i.imgur.com/xyz123.png) *(Diagrama da arquitetura)*  
+- **API Gateway** como ponto único de entrada.   
 
 ### **🔹 Banco de Dados por Serviço**  
 | Microsserviço          | Banco de Dados  | Observações                          |  
