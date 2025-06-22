@@ -1,142 +1,155 @@
-# 🧑‍💼 Voting System - User Service
+# **📌 Sistema de Usuários - Microsserviço de Autenticação e Gerenciamento**  
 
-Microsserviço dedicado à gestão de usuários dentro de um sistema de votação distribuído, com foco em autenticação segura, emissão de tokens JWT e monitoramento de métricas de performance.
+**🚀 Microsserviço responsável pelo cadastro, autenticação e gerenciamento de usuários em um sistema de votação distribuído.**  
 
-## 📌 Função na Arquitetura
+---
 
-* Centraliza autenticação e autorização JWT
-* Protege os endpoints de serviços sensíveis via roles (`USER`, `ADMIN`)
-* Expõe endpoints de login, cadastro e consulta
-* Coleta métricas com **Micrometer + Prometheus** para observabilidade
+## **📋 Sumário**  
+1. [**Visão Geral**](#-visão-geral)  
+2. [**Funcionalidades**](#-funcionalidades)  
+3. [**Tecnologias Utilizadas**](#-tecnologias-utilizadas)  
+4. [**Arquitetura do Serviço**](#-arquitetura-do-serviço)  
+5. [**Como Rodar Localmente**](#-como-rodar-localmente)  
+6. [**Endpoints da API**](#-endpoints-da-api)  
+7. [**Monitoramento e Métricas**](#-monitoramento-e-métricas)  
+8. [**Segurança**](#-segurança)  
+9. [**Testes Individuais**](#-testes-individuais)  
+10. [**Contribuição**](#-contribuição)  
+11. [**Licença**](#-licença)  
 
-## ⚙️ Destaques de Engenharia
+---
 
-* Autenticação stateless com **Spring Security + JWT**
-* Criptografia de senha com **BCryptPasswordEncoder**
-* Observabilidade com **Micrometer** (timers, counters, gauges)
-* Log estruturado com **SLF4J** e **logger contextual**
-* Validação detalhada de requisições e respostas via DTOs
+## **🌐 Visão Geral**  
+Este microsserviço é parte essencial do **Sistema de Votação em Tempo Real**, responsável por:  
+✅ **Cadastro de usuários** (com roles: `USER` e `ADMIN`)  
+✅ **Autenticação JWT** (login seguro com tokens)  
+✅ **Gerenciamento de usuários** (CRUD completo)  
+✅ **Integração com Prometheus** para métricas de performance  
 
-## 📁 Estrutura de Pacotes
+---
 
-```
-br/com/voting_system_user_service
-├── config
-│   ├── CorsConfig.java
-│   └── SecurityConfig.java
-├── controller
-│   ├── AuthController.java
-│   └── UserController.java
-├── dto
-│   ├── LoginRequest.java
-│   ├── RegisterRequest.java
-│   └── UserDTO.java
-├── entity
-│   └── User.java
-├── enums
-│   └── Role.java
-├── repository
-│   └── UserRepository.java
-├── security
-│   ├── JwtAuthenticationFilter.java
-│   └── JwtUtil.java
-├── service
-│   ├── AuthService.java
-│   └── UserService.java
-├── VotingSystemUserServiceApplication.java
-└── resources
-```
+## **🛠 Funcionalidades**  
+- **Registro de usuários** com validação de e-mail único  
+- **Login com JWT** (token válido por 24 horas)  
+- **Busca de usuários** por ID ou nome  
+- **Deleção de usuários** (restrito a ADMIN)  
+- **Métricas em tempo real** (tempo de resposta, contagem de chamadas)  
 
-## 🔐 Funcionalidades
+---
 
-* Registro de usuário com validação de e-mail duplicado
-* Login com geração de JWT e validação de credenciais
-* Consulta de perfil (`/me`), busca por ID e nome
-* Exclusão de usuário por ID ou nome
-* Métricas para cada operação: tempo, sucesso, falha, uso
+## **⚙ Tecnologias Utilizadas**  
+| Categoria       | Tecnologias                                                                 |  
+|----------------|-----------------------------------------------------------------------------|  
+| **Backend**    | Java 21, Spring Boot 3, Spring Security, JPA/Hibernate                     |  
+| **Banco de Dados** | PostgreSQL 15 (Dockerizado)                                              |  
+| **Autenticação** | JWT (JSON Web Tokens) + BCryptPasswordEncoder                           |  
+| **Monitoramento** | Micrometer, Prometheus, Actuator                                        |  
+| **Documentação** | Swagger/OpenAPI                                                         |  
+| **Infra**      | Docker, Docker Compose                                                   |  
 
-## 🔧 Tecnologias Utilizadas
+---
 
-* Java 21
-* Spring Boot 
-* Spring Security
-* JWT (`io.jsonwebtoken`)
-* Spring Data JPA + PostgreSQL
-* Micrometer (para Prometheus/Grafana)
-* SLF4J
-
-## 🔍 Observabilidade (exemplo de métricas)
-
-* `usuario.listar.todas.chamadas`
-* `usuario.buscar.id.tempo`
-* `usuario.registro.chamadas`
-* `usuario.deletar.nome.naoencontrado`
-
-## 🧪 Endpoints
-
-| Método | URI                 | Descrição                        |
-| ------ | ------------------- | -------------------------------- |
-| POST   | `/auth/register`    | Cadastro de novo usuário         |
-| POST   | `/auth/login`       | Login e retorno de JWT           |
-| GET    | `/users/me`         | Dados do próprio usuário         |
-| GET    | `/users/{id}`       | (ADMIN) Buscar usuário por ID    |
-| GET    | `/users/{userName}` | (ADMIN) Buscar usuário por nome  |
-| DELETE | `/users/{id}`       | (ADMIN) Deletar usuário por ID   |
-| DELETE | `/users/{userName}` | (ADMIN) Deletar usuário por nome |
-
-## 🚀 Executando Localmente
-
-### Requisitos
-
-* PostgreSQL rodando (porta 5432)
-* JDK 21
-* Docker
-
-### Passos
-
-```bash
-# Compilar o projeto
-./mvnw clean install
-
-# Executar a aplicação
-java -jar target/voting-system-user-service.jar
+## **🧱 Arquitetura do Serviço**  
+```mermaid
+classDiagram
+    class UserService {
+        +getAllUsers() List~UserDTO~
+        +getUserById(Long id) Optional~UserDTO~
+        +deleteUserById(Long id) boolean
+        +logMetrics()
+    }
+    
+    class AuthService {
+        +registerUser(RegisterRequest) String
+        +loginUser(LoginRequest) String
+        +generateJwtToken()
+    }
+    
+    class SecurityConfig {
+        +securityFilterChain() SecurityFilterChain
+        +passwordEncoder() PasswordEncoder
+    }
+    
+    UserService --> UserRepository
+    AuthService --> UserRepository
+    AuthService --> JwtUtil
+    SecurityConfig --> JwtAuthenticationFilter
 ```
 
-## 🔄 Integração JWT
+---
 
-* Após login:
+## **🖥 Como Rodar Localmente**  
+### **Pré-requisitos**  
+- Docker e Docker Compose instalados  
+- Java 21+  
+- Maven  
 
-```
-Authorization: Bearer <jwt-token>
-```
+### **Passo a Passo**  
+1. **Clone o repositório**  
+   ```bash
+   git clone https://github.com/SdneyFernandes/voting-system-user-service.git
+   cd voting-system-user-service
+   ```
 
-* Tokens são validados em cada requisição com filtro personalizado
+2. **Suba os containers** (PostgreSQL + PgAdmin)  
+   ```bash
+   docker-compose up 
+   ``` 
 
-## 📚 Documentação Swagger
+4. **Acesse**  
+   - API: `http://localhost:8083`  
+   - Swagger: `http://localhost:8083/swagger-ui.html`  
+   - PgAdmin: `http://localhost:5050` (credenciais: `admin@admin.com` / `admin`)  
 
-Acesse `http://localhost:8081/swagger-ui/index.html`
+---
 
-## 📈 Exemplos de Requisição
+## **🔌 Endpoints da API**  
+| Método | Endpoint                | Descrição                          | Acesso       |  
+|--------|-------------------------|-----------------------------------|-------------|  
+| POST   | `/api/users/register`   | Registra um novo usuário          | Público     |  
+| POST   | `/api/users/login`      | Gera token JWT                    | Público     |  
+| GET    | `/api/users`            | Lista todos os usuários           | ADMIN       |  
+| GET    | `/api/users/{id}`       | Busca usuário por ID              | ADMIN       |  
+| DELETE | `/api/users/{id}`       | Deleta um usuário                 | ADMIN       |  
 
-### Registro
-
+**Exemplo de Registro:**  
 ```json
+POST /api/users/register
 {
-  "email": "usuario@exemplo.com",
+  "userName": "admin",
+  "email": "admin@email.com",
   "password": "senha123",
-  "userName": "joaodasilva"
+  "role": "ADMIN"
 }
 ```
 
-### Login
+---
 
-```json
-{
-  "email": "usuario@exemplo.com",
-  "password": "senha123"
-}
-```
+## **📊 Monitoramento e Métricas**  
+O serviço expõe métricas via **Prometheus** no endpoint:  
+```http
+GET /actuator/prometheus
+```  
+**Métricas coletadas:**  
+- `usuario_login_tempo` (tempo médio de login)  
+- `usuario_registro_chamadas` (contagem de registros)  
+- `usuario_buscar_id_sucesso` (sucesso em buscas por ID)   
 
-## 📄 Licença
+---
 
-[MIT License](../LICENSE)
+## **🔐 Segurança**  
+- **BCrypt** para hashing de senhas  
+- **JWT** com expiração de 24 horas  
+- **Roles** (USER/ADMIN) para controle de acesso  
+- **Spring Security** com filtros customizados  
+
+
+---
+
+## **🤝 Contribuição**  
+1. Faça um fork do projeto  
+2. Crie uma branch:  
+   ```bash
+   git checkout -b feature/nova-funcionalidade
+   ```  
+3. Envie um PR com suas alterações  
