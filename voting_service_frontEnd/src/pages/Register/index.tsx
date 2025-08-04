@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userApi } from '../../services/api'
@@ -10,7 +11,7 @@ import {
 } from '../../styles/AuthStyles'
 
 const Register = () => {
-  const [username, setUsername] = useState('')
+  const [userName, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('USER')
@@ -19,7 +20,7 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await userApi.post('/register', { username, email, password, role })
+      await userApi.post('/register', { userName, email, password, role })
       alert('Registro bem-sucedido!')
       navigate('/')
     } catch (error) {
@@ -35,7 +36,7 @@ const Register = () => {
         <AuthInput
           type="text"
           placeholder="Nome"
-          value={username}
+          value={userName}
           onChange={(e) => setUsername(e.target.value)}
           required
         />

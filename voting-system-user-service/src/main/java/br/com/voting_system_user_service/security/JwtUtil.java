@@ -45,8 +45,6 @@ public class JwtUtil {
 	                .compact();
 	    }
 	    
-	    ++
-/    3,01
 	    public String getUserIdFromToken(String token) {
 	        return Jwts.parserBuilder()
 	                .setSigningKey(getSigningKey())
@@ -87,9 +85,19 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
- *\
- ,01}
-
+   
     
+}
+    
+ // Adicione este método na sua classe JwtUtil
+    public String generateServiceToken() {
+        return Jwts.builder()
+                .setSubject("service-account") // Identificador do serviço
+                .claim("role", Role.SERVICE.name()) // Role especial para serviços
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    } 
     
 }

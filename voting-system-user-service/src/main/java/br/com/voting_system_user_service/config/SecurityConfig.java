@@ -1,4 +1,4 @@
-  package br.com.voting_system_user_service.config;
+package br.com.voting_system_user_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,12 +18,6 @@ import br.com.voting_system_user_service.security.*;
  */
 
 
-/*
-Configura a segurança da aplicação.
-Define quais endpoints são acessíveis sem autenticação (/api/users/register e /api/users/login) e quais requerem autenticação.
-Desabilita a proteção CSRF que é comum em APIs RESTful.
-Configura a política de gerenciamento de sessão para ser sem estado (stateless),
- o que é apropriado para APIs que utilizam tokens JWT.*/
 
 
 @Configuration
@@ -44,16 +38,19 @@ public class SecurityConfig {
                 		.requestMatchers(
                 			    "/api/users/register", 
                 			    "/api/users/login",
-                			    "/swagger-ui/**",             
+                			    "/api/auth/service-token", 
+                			    "/swagger-ui/**",
                 			    "/v3/api-docs/**",            
                 			    "/swagger-resources/**",      
                 			    "/webjars/**",               
-                			    "/h2-console/**"
+                			    "/h2-console/**",
+                			    "/api/users/{id}"
                 			).permitAll()
                 	    
                 	    // Regras para rotas protegidas abaixo
                 	    .requestMatchers("/api/users").hasRole("ADMIN")
-                	    .requestMatchers("/api/users/{id}").hasRole("ADMIN")
+                	    //.requestMatchers("/api/users/{id}").hasAnyRole("ADMIN", "SERVICE")
+                	    .requestMatchers("/api/internal/**").permitAll()
                 	    .requestMatchers("/api/users/{userName}").hasRole("ADMIN")
                 	    .requestMatchers("/api/votes_session/create").hasRole("ADMIN")
                 	    .requestMatchers("/api/votes_session/{id}").hasRole("ADMIN")
@@ -79,24 +76,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-}
 
-/*Integração das Classes
-Fluxo de Registro:
-
-O cliente faz uma requisição POST para /api/users/register com os dados do RegisterRequest.
-O AuthController chama o AuthService para processar o registro.
-O AuthService verifica se o e-mail já está cadastrado, codifica a senha e salva o usuário no User Repository.
-O AuthService retorna uma mensagem de sucesso.
-Fluxo de Login:
-
-O cliente faz uma requisição POST para /api/users/login com os dados do LoginRequest.
-O AuthController chama o AuthService para processar o login.
-O AuthService valida as credenciais e, se forem válidas, gera um token JWT usando JwtUtil.
-O token é retornado ao cliente.
-Segurança:
-
-O SecurityConfig garante que apenas os endpoints de registro e login sejam acessíveis sem autenticação, enquanto outros endpoints requerem um token JWT válido.
-Validação de Token:
-
-O JwtUtil é utilizado para validar tokens em requisições subsequentes, garantindo que apenas usuários autenticados possam acessar recursos protegidos.*/
+} 

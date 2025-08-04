@@ -19,4 +19,6 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     boolean existsByVoteSessionAndUserId(VoteSession voteSession, Long userId);
 
     List<Vote> findByVoteSession(VoteSession voteSession); 
+    
+    List<Vote> findByUserId(Long userId);
 }

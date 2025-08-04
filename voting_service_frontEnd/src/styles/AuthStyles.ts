@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import styled from 'styled-components'
 
 export const AuthContainer = styled.div`
@@ -6,7 +7,32 @@ export const AuthContainer = styled.div`
   align-items: center;
   height: 100vh;
   background: #f4f4f4;
+  `
+
+export const ErrorMessage = styled.div`
+  color: #ff4444;
+  background-color: #ffebee;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
 `
+
+export const LoadingOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1.5rem;
+  z-index: 1000;
+`
+
 
 export const AuthForm = styled.form`
   background: white;

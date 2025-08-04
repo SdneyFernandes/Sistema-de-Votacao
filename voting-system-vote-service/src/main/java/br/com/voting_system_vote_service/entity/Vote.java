@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "table_vote")
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vote {
@@ -38,4 +36,46 @@ public class Vote {
 	public void prePersist() {
 		this.createdAt = LocalDateTime.now();
 	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public VoteSession getVoteSession() {
+		return voteSession;
+	}
+
+	public void setVoteSession(VoteSession voteSession) {
+		this.voteSession = voteSession;
+	}
+
+	public String getChosenOption() {
+		return chosenOption;
+	}
+
+	public void setChosenOption(String chosenOption) {
+		this.chosenOption = chosenOption;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+	
+	
 }

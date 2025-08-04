@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication
-@EnableEurekaServer  // Habilita o Eureka Server
+@EnableEurekaServer
 public class VotingSystemDiscoveryApplication {
 
 	public static void main(String[] args) {

@@ -4,6 +4,7 @@ import br.com.voting_system_user_service.repository.UserRepository;
 import io.micrometer.core.instrument.MeterRegistry;
 import br.com.voting_system_user_service.dto.UserDTO;
 import br.com.voting_system_user_service.entity.User;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 	        this.meterRegistry = meterRegistry;  
  }
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	public List<UserDTO> getAllUsers() {
 		logger.info("Recebida requisição para listar todos os usuários.");
         meterRegistry.counter("usuario.listar.todas.chamadas").increment();
@@ -55,6 +57,8 @@ private static final Logger logger = LoggerFactory.getLogger(UserService.class);
         return users.stream().map(UserDTO::new).collect(Collectors.toList());
 	}
 	
+	
+	
 	public Optional<UserDTO> getUserById(Long id) {
 		logger.info("Recebida requisição para buscar usuário com ID {}", id);
         meterRegistry.counter("usuario.buscar.id.chamadas").increment();
@@ -75,6 +79,8 @@ private static final Logger logger = LoggerFactory.getLogger(UserService.class);
         return user.map(UserDTO::new);
 	}
 	
+	
+	 @PreAuthorize("hasRole('ADMIN')")
 	 public Optional<UserDTO> getUserByName(String userName) {
 	        logger.info("Recebida requisição para buscar usuário com Nome {}", userName);
 	        meterRegistry.counter("usuario.buscar.nome.chamadas").increment();
@@ -95,6 +101,7 @@ private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 	        return user.map(UserDTO::new);
 	    }
 	
+	 @PreAuthorize("hasRole('ADMIN')")
 	 public boolean deleteUserById(Long id) {
 	        logger.info("Recebida requisição para deletar usuário com ID {}", id);
 	        meterRegistry.counter("usuario.deletar.id.chamadas").increment();
@@ -115,7 +122,9 @@ private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 	            return false;
 	        }
 	    }
-	    
+	 
+	 
+	 @PreAuthorize("hasRole('ADMIN')")
 	 public boolean deleteUserByName(String userName) {
 	        logger.info("Recebida requisição para deletar usuário com nome {}", userName);
 	        meterRegistry.counter("usuario.deletar.nome.chamadas").increment();

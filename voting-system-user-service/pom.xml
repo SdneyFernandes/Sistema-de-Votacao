@@ -113,11 +113,6 @@
     <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 
-<dependency>
-    <groupId>org.postgresql</groupId>
-    <artifactId>postgresql</artifactId>
-</dependency>
-
     <!-- Testes -->
     <dependency>
         <groupId>org.springframework.boot</groupId>

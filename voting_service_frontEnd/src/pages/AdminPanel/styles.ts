@@ -13,7 +13,6 @@ export const Title = styled.h2`
   text-align: center;
   margin-bottom: 1.5rem;
 `
-
 export const SectionTitle = styled.h3`
   font-size: 1.2rem;
   font-weight: bold;

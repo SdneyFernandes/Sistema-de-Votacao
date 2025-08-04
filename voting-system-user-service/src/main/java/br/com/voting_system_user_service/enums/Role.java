@@ -7,6 +7,7 @@ package br.com.voting_system_user_service.enums;
 
 public enum Role {
 	USER,
-	ADMIN
+	ADMIN,
+	SERVICE
 
 }

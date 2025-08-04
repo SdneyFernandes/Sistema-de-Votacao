@@ -1,7 +1,7 @@
 package br.com.voting_system_vote_service.dto;
 
 import lombok. *;
-import br.com.voting_system_user_service.enums.Role;
+import br.com.voting_system_vote_service.dto.Role;
 
 /**
  * @author fsdney

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userApi, getCurrentUser } from '../../services/api'
@@ -21,7 +22,7 @@ const Login = () => {
       console.log('Resposta do backend:', response) // Verifique toda a resposta
       console.log('Dados da resposta:', response.data) // Apenas os dados
 
-      const token = response.data
+      const { token } = response.data
       console.log('Token recebido:', token) // Debug do token
 
       if (!token) throw new Error('Token não recebido')
@@ -29,7 +30,7 @@ const Login = () => {
       localStorage.setItem('token', token)
 
       const userResponse = await userApi.get('/me', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: Bearer ${token} }
       })
 
       console.log('Usuário logado:', userResponse.data)

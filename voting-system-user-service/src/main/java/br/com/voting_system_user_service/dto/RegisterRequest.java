@@ -26,6 +26,7 @@ public class RegisterRequest {
 	private String password;
 	
 	@NotNull(message = "Role é obrigatorio")
+	   
 	private Role role;
 
 }
