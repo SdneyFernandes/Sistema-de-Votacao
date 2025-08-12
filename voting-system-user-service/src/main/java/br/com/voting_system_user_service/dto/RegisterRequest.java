@@ -10,8 +10,6 @@ import lombok.Data;
  * @author fsdney
  */
 
-//Dados de entrada para registro
-
 @Data
 public class RegisterRequest {
 	

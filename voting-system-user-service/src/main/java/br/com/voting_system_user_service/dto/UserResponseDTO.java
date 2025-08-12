@@ -10,9 +10,6 @@ import lombok. *;
 
 /**
  * @author fsdney
- * 
- * DTO de saída para retornar informações do usuário
- * 
  */
 
 

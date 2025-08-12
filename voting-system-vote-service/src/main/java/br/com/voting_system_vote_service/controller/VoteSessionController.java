@@ -43,7 +43,7 @@ public class VoteSessionController {
 	
 	
 	@Operation(summary = "Listar todas as sessões de votação")
-	@GetMapping("/")
+	@GetMapping
     public ResponseEntity<List<VoteSessionDTO>> getAllVoteSessions() {
 		logger.info("Recebida requisição para listar todas as Sessões de Votação");
         List<VoteSessionDTO> sessions = voteSessionService.getAllVoteSessions();

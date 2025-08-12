@@ -7,8 +7,6 @@ import lombok.Data;
  * @author fsdney
  */
 
-//Dados de entrada para login
-
 @Data
 public class LoginRequest {
 	

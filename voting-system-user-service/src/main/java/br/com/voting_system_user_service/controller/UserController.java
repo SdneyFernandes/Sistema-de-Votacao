@@ -2,7 +2,6 @@ package br.com.voting_system_user_service.controller;
 
 import br.com.voting_system_user_service.dto.UserDTO;
 import br.com.voting_system_user_service.service.UserService;
-import br.com.voting_system_user_service.security.JwtUtil;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +32,10 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService, JwtUtil jwtUtil) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.jwtUtil = jwtUtil;
+
     }
 
     @Operation(summary = "Listar", description = "Método para listar todos os usuários")
