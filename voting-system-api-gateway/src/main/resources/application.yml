@@ -1,12 +1,16 @@
 server:
-  port: ${PORT:8080}   # Render injeta PORT automaticamente
+  port: ${PORT:10000}   # Render usa porta 10000
 
 spring:
   application:
     name: voting-system-api-gateway
-
+  
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       globalcors:
         cors-configurations:
           '[/**]':
@@ -14,11 +18,15 @@ spring:
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
+      httpclient:
+        connect-timeout: 10000
+        response-timeout: 60s
 
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:https://voting-system-discovery.onrender.com/eureka/}
+    registry-fetch-interval-seconds: 5
   instance:
     appname: voting-system-api-gateway
     preferIpAddress: true
@@ -27,7 +35,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,gateway
   endpoint:
     health:
       show-details: always
