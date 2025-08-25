@@ -1,14 +1,21 @@
-# Etapa 1: Build com Maven
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
 COPY src ./src
-RUN mvn clean package spring-boot:repackage -DskipTests
+RUN mvn clean package -DskipTests
 
-# Etapa 2: Imagem final
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
+
+
 EXPOSE 8080
+
+
+ENV SPRING_APPLICATION_NAME=voting-system-api-gateway
+ENV EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
+ENV EUREKA_CLIENT_FETCH_REGISTRY=true
+ENV EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=https://voting-system-discovery.onrender.com/eureka/
+ENV EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

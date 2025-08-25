@@ -1,25 +1,33 @@
 server:
-  port: ${PORT:8080}  # Railway injeta $PORT
+  port: ${PORT:8080}   # Render injeta PORT automaticamente
 
 spring:
   application:
     name: voting-system-api-gateway
+
   cloud:
     gateway:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "${FRONTEND_URL:https://seu-frontend.vercel.app}"  # ← URL do Vercel
+            allowedOrigins: "http://localhost:3000,https://voting-frontend-blpn.onrender.com"
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
 
 eureka:
   client:
-    registerWithEureka: true
-    fetchRegistry: true
-    serviceUrl:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}  # ← Será configurado no Railway
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:https://voting-system-discovery.onrender.com/eureka/}
   instance:
+    appname: voting-system-api-gateway
     preferIpAddress: true
-    hostname: ${RAILWAY_STATIC_URL:localhost}  # ← Railway injeta
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
