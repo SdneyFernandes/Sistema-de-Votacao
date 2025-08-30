@@ -14,6 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+// ... outros imports existentes
+import org.springframework.http.HttpHeaders; // ✅ Adicionar
+import org.springframework.http.ResponseCookie; // ✅ Adicionar
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -80,22 +85,31 @@ public class AuthService {
     }
 
     public void logoutUser(HttpServletResponse response) {
-        logger.info("Recebida requisição para logout de usuário (AuthService)");
+    logger.info("Recebida requisição para logout de usuário (AuthService)");
 
-        Cookie userIdCookie = new Cookie("userId", null);
-        userIdCookie.setHttpOnly(false);
-        userIdCookie.setSecure(false);
-        userIdCookie.setPath("/");
-        userIdCookie.setMaxAge(0);
-        response.addCookie(userIdCookie);
+    // 🔹 Usar ResponseCookie consistentemente com o login
+    ResponseCookie userIdCookie = ResponseCookie.from("userId", "")
+        .httpOnly(false)
+        .secure(true)
+        .sameSite("None")
+        .path("/")
+        .domain("voting-system-api-gateway.onrender.com")
+        .maxAge(0)
+        .build();
 
-        Cookie roleCookie = new Cookie("role", null);
-        roleCookie.setHttpOnly(false);
-        roleCookie.setSecure(false);
-        roleCookie.setPath("/");
-        roleCookie.setMaxAge(0);
-        response.addCookie(roleCookie);
+    ResponseCookie roleCookie = ResponseCookie.from("role", "")
+        .httpOnly(false)
+        .secure(true)
+        .sameSite("None")
+        .path("/")
+        .domain("voting-system-api-gateway.onrender.com")
+        .maxAge(0)
+        .build();
 
-        logger.info("Cookies de usuário removidos (AuthService)");
-    }
+    // ✅ CORREÇÃO: Usar addHeader corretamente
+    response.addHeader(HttpHeaders.SET_COOKIE, userIdCookie.toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, roleCookie.toString());
+
+    logger.info("Cookies de usuário removidos (AuthService)");
+}
 }

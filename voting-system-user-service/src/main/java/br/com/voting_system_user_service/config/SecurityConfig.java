@@ -1,5 +1,3 @@
-// src/main/java/br/com/voting_system_user_service/config/SecurityConfig.java
-
 package br.com.voting_system_user_service.config;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,42 +30,41 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(
-                            "/actuator/health",
-                            "/api/users/register",
-                            "/api/users/login",
-                            "/api/auth/service-token",
-                            "/swagger-ui/**",
-                            "/v3/api-docs/**",
-                            "/swagger-resources/**",
-                            "/webjars/**",
-                            "/h2-console/**",
-                            "/api/users/{id}"
-                    ).permitAll()
-                        .requestMatchers("/api/users").hasRole("ADMIN")
-                        .requestMatchers("/api/internal/**").permitAll()
-                        .requestMatchers("/api/users/{userName}").hasRole("ADMIN")
-                        .requestMatchers("/api/votes_session/create").hasRole("ADMIN")
-                        .requestMatchers("/api/votes_session/{id}").hasRole("ADMIN")
-                        .requestMatchers("/api/votes_session/{id}/delete").hasRole("ADMIN")
-                        .requestMatchers("/api/votes_session").authenticated()
-                        .requestMatchers("/api/votes_session/{id}").authenticated()
-                        .requestMatchers("/api/votes_session/{id}/results").authenticated()
-                        .requestMatchers("/api/votes/{voteSessionId}/cast").authenticated()
-                        .requestMatchers("/api/users/me").authenticated()
-                        .anyRequest().authenticated()
-                )
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-            
-    // ⬇️ ADICIONE ESTA VERIFICAÇÃO - SÓ APLICAR FILTRO PARA ROTAS AUTENTICADAS
-    http.addFilterBefore(preAuthenticatedProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
+                // Rotas públicas
+                .requestMatchers(
+                        "/actuator/health",
+                        "/api/users/register",
+                        "/api/users/login",
+                        "/api/auth/service-token",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**",
+                        "/webjars/**",
+                        "/h2-console/**"
+                ).permitAll()
 
-    return http.build();
-}
+                // ADMIN
+                .requestMatchers("/api/users/**").hasRole("ADMIN") // Mais limpo
+            .requestMatchers("/api/votes_session/create").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/votes_session/*/delete").hasRole("ADMIN")
+
+                // Autenticados (USER ou ADMIN)
+                .requestMatchers("/api/votes_session/**").authenticated()
+                .requestMatchers("/api/votes/**").authenticated()
+                .requestMatchers("/api/users/me").authenticated()
+
+                // Fallback
+                .anyRequest().authenticated()
+            )
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http.addFilterBefore(preAuthenticatedProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
 
     @Bean
     public AbstractPreAuthenticatedProcessingFilter preAuthenticatedProcessingFilter() {
@@ -86,28 +83,33 @@ public class SecurityConfig {
         return filter;
     }
 
-    @Bean
-    public AuthenticationManager authenticationManager() {
-        return authentication -> {
-            String userId = (String) authentication.getPrincipal();
-            String role = (String) authentication.getCredentials();
+    // Em br.com.voting_system_user_service.config.SecurityConfig
 
-            logger.info("Cabeçalhos recebidos - X-User-Id: {}, X-User-Role: {}", userId, role);
+@Bean
+public AuthenticationManager authenticationManager() {
+    return authentication -> {
+        String userId = (String) authentication.getPrincipal();
+        String role = (String) authentication.getCredentials();
 
-            if (userId == null || role == null) {
-                throw new BadCredentialsException("Cabeçalhos X-User-Id e X-User-Role são obrigatórios");
-            }
+        logger.info("Cabeçalhos recebidos - X-User-Id: {}, X-User-Role: {}", userId, role);
 
-            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
+        if (userId == null || role == null) {
+            throw new BadCredentialsException("Cabeçalhos X-User-Id e X-User-Role são obrigatórios");
+        }
 
-            logger.info("Usuário autenticado corretamente: {}", userId);
-            return auth;
-        };
-    }
+        // ✅ MUDANÇA PRINCIPAL AQUI: Adicione o prefixo "ROLE_"
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(userId, "N/A", authorities);
+
+        logger.info("Usuário autenticado corretamente: {} com authorities {}", userId, authorities);
+        return auth;
+    };
+}
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-} 
+}
